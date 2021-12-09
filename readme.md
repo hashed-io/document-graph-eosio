@@ -17,6 +17,7 @@ git submodule update
 
 Compile & test files from submodule ( description in document-graph/readme.md or https://github.com/hashed-io/document-graph )
 
+
 Copy document-graph/include/document_graph & document-graph/include/logger to include/, document-graph/scr/document_graph to src
 
 or by terminal just running 
@@ -36,6 +37,7 @@ cp -r document-graph/src/document_graph src/
   - You can then do a 'set contract' action with 'cleos' and point in to the './build/document_editor' directory
 
 Additions to CMake should be done to the CMakeLists.txt in the './src' directory and not in the top level CMakeLists.txt
+
 
 # Test contract
 

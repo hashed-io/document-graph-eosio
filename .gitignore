@@ -10,8 +10,10 @@ build
 # test restuls
 
 test_results/
+
 nodeos-go.log
 *.log
+
 
 # copy of library
 include/document_graph
