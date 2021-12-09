@@ -1,0 +1,28 @@
+# unwanted files
+.DS_Store
+.vscode
+
+# compiled stuff
+compiled
+build
+
+
+# test restuls
+
+test_results/
+nodeos-go.log
+*.log
+
+# copy of library
+include/document_graph
+include/logger
+src/document_graph
+
+# dev stuff
+*.bak
+
+# node js stuff
+node_modules
+.env
+
+package-lock.json
