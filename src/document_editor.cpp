@@ -35,29 +35,29 @@ ACTION document_editor::createdoc (const name &creator) {
   require_auth( has_auth(creator) ? creator : get_self() );
 
   // creates the node
-  hypha::ContentGroup document_node {
-    hypha::ContentGroup {
-      hypha::Content(hypha::CONTENT_GROUP_LABEL, FIXED_DETAILS),
-      hypha::Content(TYPE, graph::DOCUMENT),
-      hypha::Content(OWNER, creator)
+  hashed::ContentGroup document_node {
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, FIXED_DETAILS),
+      hashed::Content(TYPE, graph::DOCUMENT),
+      hashed::Content(OWNER, creator)
     }
   };
 
-  hypha::Document document(get_self(), creator, std::move(document_node));
+  hashed::Document document(get_self(), creator, std::move(document_node));
   
 }
 
-ACTION document_editor::editdoc (const uint64_t &documentID, hypha::ContentGroups &content_groups) {
+ACTION document_editor::editdoc (const uint64_t &documentID, hashed::ContentGroups &content_groups) {
 
-  hypha::Document document = get_node(documentID);
+  hashed::Document document = get_node(documentID);
 
-  hypha::ContentWrapper document_content = document.getContentWrapper();
+  hashed::ContentWrapper document_content = document.getContentWrapper();
 
   name owner = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
   
   require_auth( has_auth(owner) ? owner : get_self() );
 
-  hypha::ContentGroups & doc_cg = document.getContentGroups();
+  hashed::ContentGroups & doc_cg = document.getContentGroups();
 
   doc_cg = content_groups;
 
@@ -69,28 +69,28 @@ ACTION document_editor::extenddoc (const name &creator, const uint64_t &fromNode
   
   require_auth( has_auth(creator) ? creator : get_self() );
 
-  hypha::Document document = get_node(fromNode);
+  hashed::Document document = get_node(fromNode);
 
-  hypha::ContentWrapper document_content = document.getContentWrapper();
+  hashed::ContentWrapper document_content = document.getContentWrapper();
 
   name owner = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
 
-  hypha::ContentGroup document_node {
-    hypha::ContentGroup {
-      hypha::Content(hypha::CONTENT_GROUP_LABEL, FIXED_DETAILS),
-      hypha::Content(TYPE, graph::DOCUMENT),
-      hypha::Content(OWNER, creator),
-      hypha::Content(EXTENDED_OF, owner),
+  hashed::ContentGroup document_node {
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, FIXED_DETAILS),
+      hashed::Content(TYPE, graph::DOCUMENT),
+      hashed::Content(OWNER, creator),
+      hashed::Content(EXTENDED_OF, owner),
     }
   };
 
-  hypha::Document deltas(get_self(), creator, std::move(document_node));
+  hashed::Document deltas(get_self(), creator, std::move(document_node));
 
   deltas.merge(document, deltas);
 
   m_documentGraph.replaceNode(fromNode, deltas.getId());
 
-  hypha::Edge::write(get_self(), creator, fromNode, deltas.getId(), graph::FORKED);
+  hashed::Edge::write(get_self(), creator, fromNode, deltas.getId(), graph::FORKED);
 
 
 }
@@ -103,9 +103,9 @@ ACTION document_editor::deletedoc (const uint64_t &documentID) {
   auto ditr = d_t.find(documentID);
   check(ditr != d_t.end(), "Document not found");
 
-  hypha::Document document = get_node(documentID);
+  hashed::Document document = get_node(documentID);
 
-  hypha::ContentWrapper document_content = document.getContentWrapper();
+  hashed::ContentWrapper document_content = document.getContentWrapper();
 
   name creator = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
   
@@ -130,7 +130,7 @@ ACTION document_editor::createedge (const name &creator, const uint64_t &fromNod
 
   require_auth( creator);
 
-  hypha::Edge::write(get_self(), creator, fromNode, toNode, edgeName);
+  hashed::Edge::write(get_self(), creator, fromNode, toNode, edgeName);
 
 }
 
@@ -138,7 +138,7 @@ ACTION document_editor::deleteedge (const uint64_t &fromNode, const uint64_t &to
 
   edge_table e_t(_self, _self.value);
   
-  auto eitr = e_t.find( hypha::concatID(fromNode, toNode, edgeName) );
+  auto eitr = e_t.find( hashed::concatID(fromNode, toNode, edgeName) );
   check(eitr != e_t.end(), "Edge not found");
 
   require_auth( has_auth(eitr->creator) ? eitr->creator : get_self() );
@@ -148,13 +148,13 @@ ACTION document_editor::deleteedge (const uint64_t &fromNode, const uint64_t &to
 }
 
 
-hypha::Document document_editor::get_node (const uint64_t &documentID) {
+hashed::Document document_editor::get_node (const uint64_t &documentID) {
   document_table d_t(get_self(), get_self().value);
 
   auto ditr = d_t.find(documentID);
   check(ditr != d_t.end(), "Document not found");
 
-  hypha::Document document(get_self(), ditr -> getHash());
+  hashed::Document document(get_self(), ditr -> getHash());
   return document;
 }
 
