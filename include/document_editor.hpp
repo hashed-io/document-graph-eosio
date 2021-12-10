@@ -25,7 +25,7 @@ CONTRACT document_editor : public contract {
 
     ACTION reset ();
     ACTION createdoc (const name &creator);
-    ACTION editdoc (const uint64_t &documentID, hypha::ContentGroups &content_groups);
+    ACTION editdoc (const uint64_t &documentID, hashed::ContentGroups &content_groups);
     ACTION extenddoc (const name &creator, const uint64_t &fromNode);
     ACTION deletedoc (const uint64_t &documentID);
     ACTION createedge (const name &creator, const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName);
@@ -40,9 +40,9 @@ CONTRACT document_editor : public contract {
 
     private:
 
-    hypha::DocumentGraph m_documentGraph = hypha::DocumentGraph(get_self());
+    hashed::DocumentGraph m_documentGraph = hashed::DocumentGraph(get_self());
 
-    hypha::Document get_node (const uint64_t &documentID);
+    hashed::Document get_node (const uint64_t &documentID);
 
 };
 
