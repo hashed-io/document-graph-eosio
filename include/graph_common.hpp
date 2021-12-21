@@ -19,6 +19,11 @@ namespace graph {
 
   #define NOT_FOUND -1
 
+  // labels
+  #define SYSTEM "system"
+
+  #define NODE_LABEL "node_label"
+
   #define CREATOR "creator"
   #define EXTENDED_OF "extended_of"
   #define FIXED_DETAILS "fixed_details"

@@ -24,19 +24,12 @@ CONTRACT document_editor : public contract {
     DECLARE_DOCUMENT_GRAPH(document_editor)
 
     ACTION reset ();
-    ACTION createdoc (const name &creator);
+    ACTION createdoc (const name &creator, hashed::ContentGroups &content_groups);
     ACTION editdoc (const uint64_t &documentID, hashed::ContentGroups &content_groups);
     ACTION extenddoc (const name &creator, const uint64_t &fromNode);
     ACTION deletedoc (const uint64_t &documentID);
     ACTION createedge (const name &creator, const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName);
     ACTION deleteedge (const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName);
-
-    // ACTION hi( name nm );
-
-
-
-    // using hi_action = action_wrapper<"hi"_n, &document_editor::hi>;
-
 
     private:
 

@@ -30,22 +30,48 @@ ACTION document_editor::reset () {
 }
 
 
-ACTION document_editor::createdoc (const name &creator) {
+/*
+
+  Example Doc {
+
+      "content_groups": [
+
+              [ 
+                  { "label": "content_group_label", "value": [ "string", "system" ] }, 
+                  { "label": "type", "value": [ "name", "user" ] }, 
+                  { "label": "node_label", "value": [ "string", "User: 4clin542u2ol" ] } 
+              ],
+              [ 
+                  { "label": "content_group_label", "value": [ "string", "fixed_details" ] }, 
+                  { "label": "type", "value": [ "name", "document" ] }, 
+                  { "label": "owner", "value": [ "name", "tlaclocmant2" ] } 
+              ], 
+              [
+                  { "label": "content_group_label", "value": [ "string", "details" ] },
+                  { "label": "", "value": [ "int64", "" ] }, 
+                  { "label": "", "value": [ "string", "" ] },
+                  { "label": "", "value": [ "string", "" ] },
+              ]
+          ]
+      } 
+
+*/
+
+
+
+
+ACTION document_editor::createdoc (const name &creator, hashed::ContentGroups &content_groups) {
 
   require_auth( has_auth(creator) ? creator : get_self() );
 
-  // creates the node
-  hashed::ContentGroup document_node {
-    hashed::ContentGroup {
-      hashed::Content(hashed::CONTENT_GROUP_LABEL, FIXED_DETAILS),
-      hashed::Content(TYPE, graph::DOCUMENT),
-      hashed::Content(OWNER, creator)
-    }
-  };
+  bool docExists = hashed::Document::exists(get_self(), hashed::Document::hashContents(content_groups));
+  check(!docExists, "document already exists");
 
-  hashed::Document document(get_self(), creator, std::move(document_node));
-  
+  hashed::Document document = hashed::Document::getOrNew(get_self(), creator, content_groups);
+  eosio::check(document.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
+
 }
+
 
 ACTION document_editor::editdoc (const uint64_t &documentID, hashed::ContentGroups &content_groups) {
 
@@ -53,9 +79,9 @@ ACTION document_editor::editdoc (const uint64_t &documentID, hashed::ContentGrou
 
   hashed::ContentWrapper document_content = document.getContentWrapper();
 
-  name owner = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
-  
-  require_auth( has_auth(owner) ? owner : get_self() );
+  name creator = document.getCreator();
+
+  require_auth( has_auth(creator) ? creator : get_self() );
 
   hashed::ContentGroups & doc_cg = document.getContentGroups();
 
@@ -105,10 +131,8 @@ ACTION document_editor::deletedoc (const uint64_t &documentID) {
 
   hashed::Document document = get_node(documentID);
 
-  hashed::ContentWrapper document_content = document.getContentWrapper();
+  name creator = document.getCreator();
 
-  name creator = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
-  
   require_auth( has_auth(creator) ? creator : get_self() );
 
   m_documentGraph.removeEdges(documentID);
@@ -157,4 +181,3 @@ hashed::Document document_editor::get_node (const uint64_t &documentID) {
   hashed::Document document(get_self(), ditr -> getHash());
   return document;
 }
-
