@@ -7,6 +7,7 @@
 #include "document_graph/content_wrapper.cpp"
 #include "document_graph/document_graph.cpp"
 
+
 // document_editor::~document_editor() {}
 
 document_editor::document_editor(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
@@ -58,8 +59,6 @@ ACTION document_editor::reset () {
 */
 
 
-
-
 ACTION document_editor::createdoc (const name &creator, hashed::ContentGroups &content_groups) {
 
   require_auth( has_auth(creator) ? creator : get_self() );
@@ -71,6 +70,8 @@ ACTION document_editor::createdoc (const name &creator, hashed::ContentGroups &c
   eosio::check(document.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
 
 }
+
+
 
 
 ACTION document_editor::editdoc (const uint64_t &documentID, hashed::ContentGroups &content_groups) {
@@ -91,7 +92,23 @@ ACTION document_editor::editdoc (const uint64_t &documentID, hashed::ContentGrou
 
 }
 
-ACTION document_editor::extenddoc (const name &creator, const uint64_t &fromNode) { // (creates a new document and a new edge)
+
+ACTION document_editor::extenddoc (const name &creator, const uint64_t &fromNode, const name &edgeName, hashed::ContentGroups &content_groups) { 
+  
+  require_auth( has_auth(creator) ? creator : get_self() );
+
+  bool docExists = hashed::Document::exists(get_self(), hashed::Document::hashContents(content_groups));
+  check(!docExists, "document already exists");
+
+  hashed::Document document = hashed::Document::getOrNew(get_self(), creator, content_groups);
+  eosio::check(document.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
+
+  hashed::Edge::write(get_self(), creator, fromNode, document.getId(), edgeName);
+
+}
+
+// wip
+ACTION document_editor::copydoc (const name &creator, const uint64_t &fromNode) { // (creates a new document and a new edge)
   
   require_auth( has_auth(creator) ? creator : get_self() );
 
@@ -99,28 +116,29 @@ ACTION document_editor::extenddoc (const name &creator, const uint64_t &fromNode
 
   hashed::ContentWrapper document_content = document.getContentWrapper();
 
-  name owner = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
+  // name owner = document_content.getOrFail(FIXED_DETAILS, OWNER) -> getAs<name>();
 
   hashed::ContentGroup document_node {
     hashed::ContentGroup {
       hashed::Content(hashed::CONTENT_GROUP_LABEL, FIXED_DETAILS),
       hashed::Content(TYPE, graph::DOCUMENT),
-      hashed::Content(OWNER, creator),
-      hashed::Content(EXTENDED_OF, owner),
+      hashed::Content(OWNER, creator)
+  //    hashed::Content(EXTENDED_OF, owner),
     }
   };
 
   hashed::Document deltas(get_self(), creator, std::move(document_node));
 
-  deltas.merge(document, deltas);
+  deltas = deltas.merge(deltas, document);
 
-  m_documentGraph.replaceNode(fromNode, deltas.getId());
+  deltas.modify();
 
   hashed::Edge::write(get_self(), creator, fromNode, deltas.getId(), graph::FORKED);
 
 
 }
- 
+
+
 ACTION document_editor::deletedoc (const uint64_t &documentID) {
 
   
@@ -158,7 +176,36 @@ ACTION document_editor::createedge (const name &creator, const uint64_t &fromNod
 
 }
 
+// array edges
+
+/*
+  Example
+  [
+    { 
+      fromNode: 0,
+      toNode: 1,
+      edgeName: edge.name
+    },
+    { 
+      fromNode: 10,
+      toNode: 11,
+      edgeName: edge.name
+    }
+  ]
+  
+
+  or maybe using
+
+  [
+    [0, 1, edge.name],
+    [10, 11, edge.name]
+  ]
+*/
+
+
+
 ACTION document_editor::deleteedge (const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName) {
+
 
   edge_table e_t(_self, _self.value);
   
