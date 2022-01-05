@@ -25,7 +25,7 @@ const supportedChains = {
 
 const ownerByChain = {
   [supportedChains.local]: 'eosio',
-  [supportedChains.telosTestnet]: 'llcdaomowner',
+  [supportedChains.telosTestnet]: 'tlaclocmant2',
   [supportedChains.telosMainnet]: ''
 }
 
@@ -62,7 +62,7 @@ const contractsConfig = {
     contract('document_editor', 'hashdgeowner'),
   ],
   [supportedChains.telosTestnet]: [
-    contract('document_editor', 'hashdgeowner')
+    contract('document_editor', 'tlaclocmant2')
   ],
   [supportedChains.telosMainnet]: [
 
