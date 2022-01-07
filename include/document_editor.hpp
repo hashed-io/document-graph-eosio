@@ -32,10 +32,23 @@ CONTRACT document_editor : public contract {
     ACTION createedge (const name &creator, const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName);
     ACTION deleteedge (const uint64_t &fromNode, const uint64_t &toNode, const name &edgeName);
 
+    ACTION certify(const eosio::name &certifier, 
+                const uint64_t &document_id, 
+                const std::string &signature, 
+                const std::string &notes);
+
+    // same as above, but this function will check that the document hashes to the 
+    // provided contentHash as an extra security measure
+
+    ACTION certifyhash (const eosio::name &certifier, 
+                const uint64_t &document_id, 
+                const eosio::checksum256 &contentHash, 
+                const std::string &signature, 
+                const std::string &notes);
+
   private:
 
     hashed::DocumentGraph m_documentGraph = hashed::DocumentGraph(get_self());
-
     hashed::Document get_node (const uint64_t &documentID);
 
 };
@@ -43,7 +56,7 @@ CONTRACT document_editor : public contract {
 extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action) {
   switch (action) {
     EOSIO_DISPATCH_HELPER(document_editor, (reset)
-      (createdoc)(editdoc)(copydoc)(extenddoc)(deletedoc)(createedge)(deleteedge)
+      (createdoc)(editdoc)(copydoc)(extenddoc)(deletedoc)(createedge)(deleteedge)(certify)(certifyhash)
     )
   }
 }
