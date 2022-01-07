@@ -39,6 +39,19 @@ cp -r document-graph/src/document_graph src/
 Additions to CMake should be done to the CMakeLists.txt in the './src' directory and not in the top level CMakeLists.txt
 
 
+## cleos Quickstart 
+NOTE: Assumes you have relevant environmnent setup..
+``` bash
+# use your key
+KEY = EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+cleos create account eosio documents $KEY $KEY
+cleos create account eosio bob $KEY $KEY
+cleos create account eosio alice $KEY $KEY
+cleos set contract documents document_editor
+```
+
+Some examples to use in the console are at `examples/`
+
 # Test contract
 
 To test the contract run 
