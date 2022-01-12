@@ -17,6 +17,8 @@ namespace graph {
 
   static constexpr name FORKED = name("forked");
 
+
+  static constexpr name CERTIFICATE = name("certificate");
   static constexpr name CERTIFIED_BY = name("certified.by");
 
   #define NOT_FOUND -1
@@ -29,11 +31,10 @@ namespace graph {
 
   #define NODE_LABEL "node_label"
 
-
+  #define HASH "document_hash"
   #define TYPE "type"
   #define SIGNATURE "signature"
   #define NOTES "notes"
-  #define CERTIFICATE "certificate"
 
 
   // 

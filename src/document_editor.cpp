@@ -240,6 +240,26 @@ ACTION document_editor::deleteedge (const uint64_t &fromNode, const uint64_t &to
 
 */
 
+/*
+  Certificate Doc {
+
+      "content_groups": [
+
+              [ 
+                  { "label": "content_group_label", "value": [ "string", "system" ] }, 
+                  { "label": "type", "value": [ "name", "certificate" ] }, 
+                  { "label": "node_label", "value": [ "string", "Certified by: certifier" ] } 
+              ],
+              [
+                  { "label": "content_group_label", "value": [ "string", "details" ] },
+                  { "label": "signature", "value": [ "string", "certifier pkh" ] }, 
+                  { "label": "notes", "value": [ "string", "certifier notes" ] }
+              ]
+          ]
+      } 
+
+*/
+
 ACTION document_editor::certify (const eosio::name &certifier, 
               const uint64_t &document_id, 
               const std::string &signature, 
@@ -248,23 +268,20 @@ ACTION document_editor::certify (const eosio::name &certifier,
 
   require_auth( has_auth(certifier) ? certifier : get_self() );
 
-  document_table d_t(_self, _self.value);
-  
-  auto ditr = d_t.find(document_id);
-  check(ditr != d_t.end(), "Document not found");
-
+  hashed::Document document = get_node(document_id);
 
   hashed::ContentGroups certificate_cgs {
 
     hashed::ContentGroup {
       hashed::Content(hashed::CONTENT_GROUP_LABEL, DETAILS),
       hashed::Content(SIGNATURE, signature),
-      hashed::Content(NOTES, notes)
+      hashed::Content(NOTES, notes),
+      hashed::Content(HASH, document.getHash())
     },
 
     hashed::ContentGroup {
       hashed::Content(hashed::CONTENT_GROUP_LABEL, SYSTEM),
-      hashed::Content(TYPE, CERTIFICATE),
+      hashed::Content(TYPE, graph::CERTIFICATE),
       hashed::Content(NODE_LABEL, "Certified by: " + certifier.to_string())
 
     }
@@ -301,12 +318,13 @@ ACTION document_editor::certifyhash (const eosio::name &certifier,
     hashed::ContentGroup {
       hashed::Content(hashed::CONTENT_GROUP_LABEL, DETAILS),
       hashed::Content(SIGNATURE, signature),
-      hashed::Content(NOTES, notes)
+      hashed::Content(NOTES, notes),
+      hashed::Content(HASH, document.getHash())
     },
 
     hashed::ContentGroup {
       hashed::Content(hashed::CONTENT_GROUP_LABEL, SYSTEM),
-      hashed::Content(TYPE, CERTIFICATE),
+      hashed::Content(TYPE, graph::CERTIFICATE),
       hashed::Content(NODE_LABEL, "Certified by: " + certifier.to_string())
 
     }
