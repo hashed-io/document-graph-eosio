@@ -1,0 +1,1 @@
+cleos -u https://testnet.telos.caleos.io get table documents documents documents

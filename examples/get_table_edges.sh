@@ -1,0 +1,1 @@
+cleos get table documents documents edges

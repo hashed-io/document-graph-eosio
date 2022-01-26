@@ -1,0 +1,7 @@
+# TODO
+
+- Hacer un script que corra la creación de un document por segundo y que sea configurable.
+- Hacer 1k docs y ver cuantos logró hacerlo.
+- Decidir pesados y no pesados.
+- Para pesados un content group con un label enorme.
+- Cantidades ajustables [num_duc, peso_para_pesado].
