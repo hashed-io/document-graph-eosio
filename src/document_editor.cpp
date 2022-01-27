@@ -219,6 +219,126 @@ ACTION document_editor::deleteedge (const uint64_t &fromNode, const uint64_t &to
 }
 
 
+
+
+// function will: 
+// 1. Ensure the document exists
+//  2. Create a new document for certificate, persisting signature and notes
+//  3. Create a new edge from document_id to the newly created document
+
+/*
+  Document(get_self(), certifier,
+                   ContentGroups{
+                       ContentGroup{
+                           Content(CONTENT_GROUP_LABEL, DETAILS),
+                           Content(SIGNATURE, signature),
+                           Content(NOTES, notes)},
+                       ContentGroup{
+                           Content(CONTENT_GROUP_LABEL, SYSTEM),
+                           Content(TYPE, common::CERTIFICATE),
+                           Content(NODE_LABEL, "Certified by: " + certifier.to_string())}})
+
+*/
+
+/*
+  Certificate Doc {
+
+      "content_groups": [
+
+              [ 
+                  { "label": "content_group_label", "value": [ "string", "system" ] }, 
+                  { "label": "type", "value": [ "name", "certificate" ] }, 
+                  { "label": "node_label", "value": [ "string", "Certified by: certifier" ] } 
+              ],
+              [
+                  { "label": "content_group_label", "value": [ "string", "details" ] },
+                  { "label": "signature", "value": [ "string", "certifier pkh" ] }, 
+                  { "label": "notes", "value": [ "string", "certifier notes" ] }
+              ]
+          ]
+      } 
+
+*/
+
+ACTION document_editor::certify (const eosio::name &certifier, 
+              const uint64_t &document_id, 
+              const std::string &signature, 
+              const std::string &notes) {
+
+
+  require_auth( has_auth(certifier) ? certifier : get_self() );
+
+  hashed::Document document = get_node(document_id);
+
+  hashed::ContentGroups certificate_cgs {
+
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, DETAILS),
+      hashed::Content(SIGNATURE, signature),
+      hashed::Content(NOTES, notes),
+      hashed::Content(HASH, document.getHash())
+    },
+
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, SYSTEM),
+      hashed::Content(TYPE, graph::CERTIFICATE),
+      hashed::Content(NODE_LABEL, "Certified by: " + certifier.to_string())
+
+    }
+  };
+
+
+  hashed::Document certificate = hashed::Document::getOrNew( get_self(), certifier, std::move(certificate_cgs) );
+  eosio::check(certificate.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
+
+  hashed::Edge::write( get_self(), certifier, document_id, certificate.getId(), graph::CERTIFIED_BY );
+
+
+
+}
+
+
+// same as above, but this function will check that the document hashes to the 
+// provided contentHash as an extra security measure
+ACTION document_editor::certifyhash (const eosio::name &certifier, 
+              const uint64_t &document_id, 
+              const eosio::checksum256 &contentHash, 
+              const std::string &signature, 
+              const std::string &notes) {
+
+  require_auth( has_auth(certifier) ? certifier : get_self() );
+
+  hashed::Document document = get_node(document_id);
+
+  check(document.getHash() == contentHash, "0");
+
+
+  hashed::ContentGroups certificate_cgs {
+
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, DETAILS),
+      hashed::Content(SIGNATURE, signature),
+      hashed::Content(NOTES, notes),
+      hashed::Content(HASH, document.getHash())
+    },
+
+    hashed::ContentGroup {
+      hashed::Content(hashed::CONTENT_GROUP_LABEL, SYSTEM),
+      hashed::Content(TYPE, graph::CERTIFICATE),
+      hashed::Content(NODE_LABEL, "Certified by: " + certifier.to_string())
+
+    }
+  };
+
+
+  hashed::Document certificate = hashed::Document::getOrNew( get_self(), certifier, std::move(certificate_cgs) );
+  eosio::check(certificate.getCreated().sec_since_epoch() > 0, "created_date not populated when saved");
+
+  hashed::Edge::write( get_self(), certifier, document_id, certificate.getId(), graph::CERTIFIED_BY );
+
+}
+
+
 hashed::Document document_editor::get_node (const uint64_t &documentID) {
   document_table d_t(get_self(), get_self().value);
 
@@ -228,3 +348,6 @@ hashed::Document document_editor::get_node (const uint64_t &documentID) {
   hashed::Document document(get_self(), ditr -> getHash());
   return document;
 }
+
+
+
