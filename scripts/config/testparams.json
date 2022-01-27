@@ -1,0 +1,6 @@
+{
+  "param": {
+    "value": ["uint64", 10],
+    "description": "example"
+  }
+}
