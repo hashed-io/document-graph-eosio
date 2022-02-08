@@ -1,0 +1,7 @@
+# Commands to deploy in mainnet ussing cleos
+
+./cleos -u https://api.telosfoundation.io set code dg.sh compiled/document_editor.wasm -p tlalocman.sh@active
+
+./cleos -u https://api.telosfoundation.io set abi dg.sh compiled/document_editor.abi -p tlalocman.sh@active
+
+# make sure to run migrations!
