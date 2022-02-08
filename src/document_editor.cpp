@@ -108,6 +108,7 @@ ACTION document_editor::extenddoc (const name &creator, const uint64_t &fromNode
 }
 
 // wip
+/*
 ACTION document_editor::copydoc (const name &creator, const uint64_t &fromNode) { // (creates a new document and a new edge)
   
   require_auth( has_auth(creator) ? creator : get_self() );
@@ -137,6 +138,7 @@ ACTION document_editor::copydoc (const name &creator, const uint64_t &fromNode) 
 
 
 }
+*/
 
 
 ACTION document_editor::deletedoc (const uint64_t &documentID) {
