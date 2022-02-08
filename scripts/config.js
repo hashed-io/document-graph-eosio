@@ -59,7 +59,7 @@ const publicKeysByChain = {
 
 const contractsConfig = {
   [supportedChains.local]: [
-    contract('document_editor', 'hashdgeowner'),
+    contract('document_editor', 'dg.sh'),
   ],
   [supportedChains.telosTestnet]: [
     contract('document_editor', 'tlaclocmant2')
@@ -86,8 +86,13 @@ for (const c of contracts) {
 
 const permissionsConfig = [
   {
-    target: `${contractNames.genericdoc}@active`,
-    actor: `${contractNames.genericdoc}@eosio.code`
+    target: `${contractNames.document_editor}@active`,
+    actor: `${contractNames.document_editor}@eosio.code`
+  },
+
+  {
+    target: `${contractNames.document_editor}@active`,
+    actor: `tlalocman.sh@active`
   }
 ]
 
